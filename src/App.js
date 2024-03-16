@@ -74,22 +74,29 @@ function App() {
     ]
 
     const handleAddToOrderList = () => {
-        let newOrderItems = [];
-        let total = 0; // 총 가격을 계산하기 위한 변수 추가
+        let updatedOrderItems = [...orderItems]; // 기존 주문 항목을 복사하여 새로운 배열에 저장
+
         for (const cafe of cafes) {
             const quantity = quantityMap[cafe.id] || 0;
             if (quantity > 0) {
-                newOrderItems.push({
-                    id: cafe.id,
-                    title: cafe.title,
-                    quantity: quantity,
-                    price: cafe.price * quantity
-                });
+                const existingItemIndex = updatedOrderItems.findIndex(item => item.id === cafe.id);
+                if (existingItemIndex !== -1) { // 이미 주문 목록에 있는 경우
+                    // 수량을 업데이트하고 가격 재계산
+                    updatedOrderItems[existingItemIndex].quantity += quantity;
+                    updatedOrderItems[existingItemIndex].price = cafe.price * updatedOrderItems[existingItemIndex].quantity;
+                } else { // 주문 목록에 없는 경우 새로 추가
+                    updatedOrderItems.push({
+                        id: cafe.id,
+                        title: cafe.title,
+                        quantity: quantity,
+                        price: cafe.price * quantity
+                    });
+                }
             }
         }
-        setOrderItems([...orderItems, ...newOrderItems]);
-        setQuantityMap({});
-        setTotalPrice(total); // 총 가격 업데이트
+
+        setOrderItems(updatedOrderItems); // 업데이트된 주문 목록으로 설정
+        setQuantityMap({}); // 수량 맵 초기화
     };
 
 
